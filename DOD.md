@@ -10,3 +10,4 @@
 8. Without extra infra
 9. Immutable
 10. Compiled for Windows and Macos
+11. In two days
