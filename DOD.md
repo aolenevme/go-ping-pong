@@ -9,5 +9,5 @@
 7. Security
 8. Without extra infra
 9. Immutable
-10. Compiled for Windows and Macos
-11. In two days
+10. In two days
+11. Go only. Compile it into wasm
