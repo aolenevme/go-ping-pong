@@ -1,11 +1,11 @@
 package handlers
 
 import (
-        "net/http"
-        "net/http/httptest"
+	_ "github.com/eshekak/go-ping-pong/testing"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
-	_ "github.com/eshekak/go-ping-pong/testing"
 )
 
 func TestMainPageHandler(t *testing.T) {

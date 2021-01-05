@@ -1,8 +1,8 @@
 package main
 
 import (
-	"net/http"
 	"github.com/eshekak/go-ping-pong/handlers"
+	"net/http"
 )
 
 func main() {
