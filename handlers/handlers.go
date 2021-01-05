@@ -1,10 +1,15 @@
 package handlers
 
 import (
-        "io"
+	"html/template"
         "net/http"
 )
 
-func HelloHandler(w http.ResponseWriter, req *http.Request) {
-	io.WriteString(w, "Hello, world!\n")
+var templates = template.Must(template.ParseFiles("./handlers/index.html"))
+
+func MainPageHandler(w http.ResponseWriter, req *http.Request) {
+	err := templates.ExecuteTemplate(w, "index.html", nil)
+        if err != nil {
+                http.Error(w, err.Error(), http.StatusInternalServerError)
+        }
 }
