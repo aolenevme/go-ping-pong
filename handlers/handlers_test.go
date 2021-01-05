@@ -22,7 +22,12 @@ func TestMainPageHandler(t *testing.T) {
 	got := removeAllSpaces(rr.Body.String())
 	expected := removeAllSpaces(`
 	<html>
-		<head></head>
+		<head>
+			<style>
+				body{margin:0;width:100vw;height:100vh}
+				canvas{width:100%;height:100%;}
+			</style>
+		</head>
 		<body>
 			<canvas>Classic 2D Ping Pong</canvas>
 		</body>
@@ -34,7 +39,8 @@ func TestMainPageHandler(t *testing.T) {
 }
 
 func removeAllSpaces(str string) string {
-	str_without_new_lines := strings.ReplaceAll(str, "\n", "")
+	intermediate_str := strings.ReplaceAll(str, "\n", "")
+	intermediate_str = strings.ReplaceAll(intermediate_str, " ", "")
 
-	return strings.ReplaceAll(str_without_new_lines, "\t", "")
+	return strings.ReplaceAll(intermediate_str, "\t", "")
 }
