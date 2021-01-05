@@ -1,15 +1,11 @@
 package main
 
 import (
-	"io"
 	"net/http"
+	"github.com/eshekak/go-ping-pong/handlers"
 )
 
 func main() {
-	helloHandler := func(w http.ResponseWriter, req *http.Request) {
-		io.WriteString(w, "Hello, world!\n")
-	}
-
-	http.HandleFunc("/", helloHandler)
+	http.HandleFunc("/", handlers.HelloHandler)
 	http.ListenAndServe(":8080", nil)
 }
