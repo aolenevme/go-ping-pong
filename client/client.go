@@ -22,7 +22,7 @@ var (
 )
 
 func main() {
-	js.Global().Call("setInterval", js.FuncOf(draw), "16")
+	js.Global().Call("setInterval", js.FuncOf(draw), 10)
 	<-isDone
 }
 
@@ -47,7 +47,7 @@ func draw(this js.Value, args []js.Value) interface{} {
 
 func drawBall() {
 	ctx.Call("beginPath")
-	ctx.Call("arc", x, y, ballRadius, 0 ,math.Get("PI").Int() * 2)
+	ctx.Call("arc", x, y, ballRadius, 0 , math.Get("PI").Int() * 2)
 	ctx.Set("fillStyle", mainColor)
 	ctx.Call("fill")
 	ctx.Call("closePath")
