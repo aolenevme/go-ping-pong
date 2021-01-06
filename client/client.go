@@ -1,8 +1,7 @@
-package client
+package main
 
-import "syscall/js"
+import "fmt"
 
 func main() {
-	alert := js.Global().Get("alert")
-	alert.Invoke("Hello, ping-pong!")
+	fmt.Println("Hello, WebAssembly!")
 }
