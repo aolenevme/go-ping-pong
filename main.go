@@ -1,11 +1,7 @@
 package main
 
-import (
-	"github.com/eshekak/go-ping-pong/handlers"
-	"net/http"
-)
+import "net/http"
 
 func main() {
-	http.HandleFunc("/", handlers.MainPageHandler)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8080", http.FileServer(http.Dir("./static")))
 }

@@ -4,9 +4,10 @@
                 <script src="wasm_exec.js"></script>
                 <script>
                 	const go = new Go();
-                        WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
-                        	go.run(result.instance);
-                        });
+                        WebAssembly
+				.instantiateStreaming(fetch("client.wasm"), go.importObject)
+				.then(result => go.run(result.instance))
+				.catch(error => console.error("Failed to fetch client.wasm"));
                 </script>
 		<style>
                 	body{margin:0;width:100vw;height:100vh}
