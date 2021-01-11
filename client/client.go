@@ -7,6 +7,7 @@ var (
 	document js.Value = js.Global().Get("document")
 	canvas js.Value = document.Call("getElementById", "canvas")
 	ctx js.Value = canvas.Call("getContext", "2d")
+	interval js.Value = js.Null()
 	canvasWidth int = canvas.Get("width").Int()
 	canvasHeight int = canvas.Get("height").Int()
 	ballRadius int = 10
@@ -22,7 +23,7 @@ var (
 )
 
 func main() {
-	js.Global().Call("setInterval", js.FuncOf(draw), 10)
+	interval = js.Global().Call("setInterval", js.FuncOf(draw), 10)
 	<-isDone
 }
 
@@ -35,8 +36,16 @@ func draw(this js.Value, args []js.Value) interface{} {
 		dx = -dx
 	}
 
-	if y + dy > canvasHeight - ballRadius || y + dy < ballRadius {
+	if y + dy < ballRadius {
 		dy = -dy
+	} else if y + dy > canvasHeight - ballRadius {
+		if x > paddleX && x < paddleX + paddleWidth {
+			dy = -dy
+		} else {
+			js.Global().Call("alert", "GAME OVER")
+			document.Get("location").Call("reload")
+			js.Global().Call("clearInterval", interval)
+		}
 	}
 
 	x += dx
