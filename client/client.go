@@ -19,12 +19,42 @@ var (
 	paddleHeight int = 10
 	paddleX int = (canvasWidth - paddleWidth) / 2
 	mainColor string = "#0095DD"
+	rightPressed bool = false
+	leftPressed bool = false
 	isDone = make(chan bool)
 )
 
 func main() {
 	interval = js.Global().Call("setInterval", js.FuncOf(draw), 10)
+	document.Call("addEventListener", "keydown", js.FuncOf(keyDownHandler), false)
+	document.Call("addEventListener", "keyup", js.FuncOf(keyUpHandler), false)
 	<-isDone
+}
+
+func keyDownHandler(this js.Value, args []js.Value) interface{} {
+	event := args[0]
+	key := event.Get("key").String()
+
+	if key == "Right" || key == "ArrowRight" {
+		rightPressed = true
+	} else if key == "Left" || key == "ArrowLeft" {
+		leftPressed = true
+	}
+
+	return nil
+}
+
+func keyUpHandler(this js.Value, args []js.Value) interface{} {
+	event := args[0]
+	key := event.Get("key").String()
+
+	if key == "Right" || key == "ArrowRight" {
+		rightPressed = false
+	} else if key == "Left" || key == "ArrowLeft" {
+		leftPressed = false
+	}
+
+	return nil
 }
 
 func draw(this js.Value, args []js.Value) interface{} {
@@ -46,6 +76,12 @@ func draw(this js.Value, args []js.Value) interface{} {
 			document.Get("location").Call("reload")
 			js.Global().Call("clearInterval", interval)
 		}
+	}
+
+	if rightPressed && paddleX < canvasWidth - paddleWidth {
+		paddleX += 7
+	} else if leftPressed && paddleX > 0 {
+		paddleX -= 7
 	}
 
 	x += dx
