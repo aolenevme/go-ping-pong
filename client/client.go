@@ -18,7 +18,8 @@ var (
 	paddleWidth  int      = 75
 	paddleHeight int      = 10
 	paddleX      int      = (canvasWidth - paddleWidth) / 2
-	mainColor    string   = "#0095DD"
+	paddleColor  string   = "#141414"
+	ballColor    string   = "#d0d0cf"
 	rightPressed bool     = false
 	leftPressed  bool     = false
 	isDone                = make(chan bool)
@@ -93,7 +94,7 @@ func draw(this js.Value, args []js.Value) interface{} {
 func drawBall() {
 	ctx.Call("beginPath")
 	ctx.Call("arc", x, y, ballRadius, 0, math.Get("PI").Int()*2)
-	ctx.Set("fillStyle", mainColor)
+	ctx.Set("fillStyle", ballColor)
 	ctx.Call("fill")
 	ctx.Call("closePath")
 }
@@ -101,7 +102,7 @@ func drawBall() {
 func drawPaddle() {
 	ctx.Call("beginPath")
 	ctx.Call("rect", paddleX, canvasHeight-paddleHeight, paddleWidth, paddleHeight)
-	ctx.Set("fillStyle", mainColor)
+	ctx.Set("fillStyle", paddleColor)
 	ctx.Call("fill")
 	ctx.Call("closePath")
 }
