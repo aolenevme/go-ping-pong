@@ -67,16 +67,14 @@ func draw(this js.Value, args []js.Value) interface{} {
 		dx = -dx
 	}
 
-	if y+dy < ballRadius {
+	if (x+dx >= paddleX && x+dx <= paddleX+paddleWidth && y+ballRadius >= canvasHeight-paddleHeight) || y+dy < ballRadius {
 		dy = -dy
-	} else if y+dy > canvasHeight-ballRadius {
-		if x > paddleX && x < paddleX+paddleWidth {
-			dy = -dy
-		} else {
-			js.Global().Call("alert", "GAME OVER")
-			document.Get("location").Call("reload")
-			js.Global().Call("clearInterval", interval)
-		}
+	}
+
+	if y+ballRadius > canvasHeight {
+		js.Global().Call("alert", "GAME OVER")
+		document.Get("location").Call("reload")
+		js.Global().Call("clearInterval", interval)
 	}
 
 	if rightPressed && paddleX < canvasWidth-paddleWidth {
