@@ -3,30 +3,30 @@ package main
 import "syscall/js"
 
 var (
-	math         js.Value = js.Global().Get("Math")
-	document     js.Value = js.Global().Get("document")
-	canvas       js.Value = document.Call("getElementById", "canvas")
-	ctx          js.Value = canvas.Call("getContext", "2d")
-	interval     js.Value = js.Null()
-	canvasWidth  int      = canvas.Get("width").Int()
-	canvasHeight int      = canvas.Get("height").Int()
-	ballRadius   int      = 10
-	x            int      = canvasWidth / 2
-	y            int      = canvasHeight - 30
-	dx           int      = 2
-	dy           int      = -2
-	paddleWidth  int      = 75
-	paddleHeight int      = 10
-	paddleX      int      = (canvasWidth - paddleWidth) / 2
-	paddleColor  string   = "#141414"
-	ballColor    string   = "#d0d0cf"
-	rightPressed bool     = false
-	leftPressed  bool     = false
-	isDone                = make(chan bool)
+	math         = js.Global().Get("Math")
+	document     = js.Global().Get("document")
+	canvas       = document.Call("getElementById", "canvas")
+	ctx          = canvas.Call("getContext", "2d")
+	interval     = js.Null()
+	canvasWidth  = canvas.Get("width").Int()
+	canvasHeight = canvas.Get("height").Int()
+	ballRadius   = 10
+	x            = canvasWidth / 2
+	y            = canvasHeight - 30
+	dx           = 2
+	dy           = -2
+	paddleWidth  = 75
+	paddleHeight = 10
+	paddleX      = (canvasWidth - paddleWidth) / 2
+	paddleColor  = "#141414"
+	ballColor    = "#d0d0cf"
+	rightPressed = false
+	leftPressed  = false
+	isDone       = make(chan bool)
 )
 
 func main() {
-	interval = js.Global().Call("setInterval", js.FuncOf(draw), 100)
+	interval = js.Global().Call("setInterval", js.FuncOf(draw), 10)
 	document.Call("addEventListener", "keydown", js.FuncOf(keyDownHandler), false)
 	document.Call("addEventListener", "keyup", js.FuncOf(keyUpHandler), false)
 	<-isDone
