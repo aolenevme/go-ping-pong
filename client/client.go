@@ -26,7 +26,7 @@ var (
 )
 
 func main() {
-	interval = js.Global().Call("setInterval", js.FuncOf(draw), 10)
+	interval = js.Global().Call("setInterval", js.FuncOf(draw), 100)
 	document.Call("addEventListener", "keydown", js.FuncOf(keyDownHandler), false)
 	document.Call("addEventListener", "keyup", js.FuncOf(keyUpHandler), false)
 	<-isDone
@@ -63,15 +63,15 @@ func draw(this js.Value, args []js.Value) interface{} {
 	drawBall()
 	drawPaddle()
 
-	if x+dx > canvasWidth-ballRadius || x+dx < ballRadius {
+	if x > canvasWidth-ballRadius || x < ballRadius {
 		dx = -dx
 	}
 
-	if (x+dx >= paddleX && x+dx <= paddleX+paddleWidth && y+ballRadius >= canvasHeight-paddleHeight) || y+dy < ballRadius {
+	if (x >= paddleX && x <= paddleX+paddleWidth && y+ballRadius >= canvasHeight-paddleHeight) || y+dy <= ballRadius {
 		dy = -dy
 	}
 
-	if y+ballRadius > canvasHeight {
+	if y+ballRadius > canvasHeight-paddleHeight {
 		js.Global().Call("alert", "GAME OVER")
 		document.Get("location").Call("reload")
 		js.Global().Call("clearInterval", interval)
