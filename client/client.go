@@ -61,33 +61,41 @@ func keyUpHandler(this js.Value, args []js.Value) interface{} {
 func draw(this js.Value, args []js.Value) interface{} {
 	ctx.Call("clearRect", 0, 0, canvasWidth, canvasHeight)
 	drawBall()
-	drawPaddle(paddleTopX, canvasHeight-paddleHeight)
-	drawPaddle(paddleBottomX, paddleHeight)
+	drawPaddle(paddleTopX, 0)
+	drawPaddle(paddleBottomX, canvasHeight-paddleHeight)
 
 	if x > canvasWidth-ballRadius || x < ballRadius {
 		dx = -dx
 	}
 
-	if (x >= paddleTopX && x <= paddleTopX+paddleWidth && y+ballRadius >= canvasHeight-paddleHeight) || y+dy <= ballRadius {
+	if shouldRevertBallByY() {
 		dy = -dy
 	}
 
-	if y+ballRadius > canvasHeight-paddleHeight {
+	if y+ballRadius > canvasHeight-paddleHeight || y-ballRadius < paddleHeight {
 		js.Global().Call("alert", "GAME OVER")
 		document.Get("location").Call("reload")
 		js.Global().Call("clearInterval", interval)
 	}
 
-	if rightPressed && paddleTopX < canvasWidth-paddleWidth {
-		paddleTopX += 7
-	} else if leftPressed && paddleTopX > 0 {
-		paddleTopX -= 7
+	if rightPressed && paddleBottomX < canvasWidth-paddleWidth {
+		paddleBottomX += 7
+	} else if leftPressed && paddleBottomX > 0 {
+		paddleBottomX -= 7
 	}
 
 	x += dx
 	y += dy
 
 	return nil
+}
+
+func shouldRevertBallByY() bool {
+	isBallTouchedTopPaddle := x >= paddleTopX && x <= paddleTopX+paddleWidth && y-ballRadius <= paddleHeight
+
+	isBallTouchedBottomPaddle := x >= paddleBottomX && x <= paddleBottomX+paddleWidth && y+ballRadius >= canvasHeight-paddleHeight
+
+	return isBallTouchedTopPaddle || isBallTouchedBottomPaddle
 }
 
 func drawBall() {
