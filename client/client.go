@@ -3,26 +3,26 @@ package main
 import "syscall/js"
 
 var (
-	math         = js.Global().Get("Math")
-	document     = js.Global().Get("document")
-	canvas       = document.Call("getElementById", "canvas")
-	ctx          = canvas.Call("getContext", "2d")
-	interval     = js.Null()
-	canvasWidth  = canvas.Get("width").Int()
-	canvasHeight = canvas.Get("height").Int()
-	ballRadius   = 10
-	x            = canvasWidth / 2
-	y            = canvasHeight - 30
-	dx           = 2
-	dy           = -2
-	paddleWidth  = 75
-	paddleHeight = 10
-	paddleX      = (canvasWidth - paddleWidth) / 2
-	paddleColor  = "#141414"
-	ballColor    = "#d0d0cf"
-	rightPressed = false
-	leftPressed  = false
-	isDone       = make(chan bool)
+	math                      = js.Global().Get("Math")
+	document                  = js.Global().Get("document")
+	canvas                    = document.Call("getElementById", "canvas")
+	ctx                       = canvas.Call("getContext", "2d")
+	interval                  = js.Null()
+	canvasWidth               = canvas.Get("width").Int()
+	canvasHeight              = canvas.Get("height").Int()
+	ballRadius                = 10
+	x                         = canvasWidth / 2
+	y                         = canvasHeight - 30
+	dx                        = 2
+	dy                        = -2
+	paddleWidth               = 75
+	paddleHeight              = 10
+	paddleTopX, paddleBottomX = (canvasWidth - paddleWidth) / 2, (canvasWidth - paddleWidth) / 2
+	paddleColor               = "#141414"
+	ballColor                 = "#d0d0cf"
+	rightPressed              = false
+	leftPressed               = false
+	isDone                    = make(chan bool)
 )
 
 func main() {
@@ -61,14 +61,14 @@ func keyUpHandler(this js.Value, args []js.Value) interface{} {
 func draw(this js.Value, args []js.Value) interface{} {
 	ctx.Call("clearRect", 0, 0, canvasWidth, canvasHeight)
 	drawBall()
-	drawTopPaddle()
-	drawBottomPaddle()
+	drawPaddle(paddleTopX, canvasHeight-paddleHeight)
+	drawPaddle(paddleBottomX, paddleHeight)
 
 	if x > canvasWidth-ballRadius || x < ballRadius {
 		dx = -dx
 	}
 
-	if (x >= paddleX && x <= paddleX+paddleWidth && y+ballRadius >= canvasHeight-paddleHeight) || y+dy <= ballRadius {
+	if (x >= paddleTopX && x <= paddleTopX+paddleWidth && y+ballRadius >= canvasHeight-paddleHeight) || y+dy <= ballRadius {
 		dy = -dy
 	}
 
@@ -78,10 +78,10 @@ func draw(this js.Value, args []js.Value) interface{} {
 		js.Global().Call("clearInterval", interval)
 	}
 
-	if rightPressed && paddleX < canvasWidth-paddleWidth {
-		paddleX += 7
-	} else if leftPressed && paddleX > 0 {
-		paddleX -= 7
+	if rightPressed && paddleTopX < canvasWidth-paddleWidth {
+		paddleTopX += 7
+	} else if leftPressed && paddleTopX > 0 {
+		paddleTopX -= 7
 	}
 
 	x += dx
@@ -98,17 +98,9 @@ func drawBall() {
 	ctx.Call("closePath")
 }
 
-func drawTopPaddle() {
+func drawPaddle(x, y int) {
 	ctx.Call("beginPath")
-	ctx.Call("rect", paddleX, canvasHeight-paddleHeight, paddleWidth, paddleHeight)
-	ctx.Set("fillStyle", paddleColor)
-	ctx.Call("fill")
-	ctx.Call("closePath")
-}
-
-func drawBottomPaddle() {
-	ctx.Call("beginPath")
-	ctx.Call("rect", paddleX, paddleHeight, paddleWidth, paddleHeight)
+	ctx.Call("rect", x, y, paddleWidth, paddleHeight)
 	ctx.Set("fillStyle", paddleColor)
 	ctx.Call("fill")
 	ctx.Call("closePath")
