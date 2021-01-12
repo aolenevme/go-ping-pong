@@ -61,7 +61,8 @@ func keyUpHandler(this js.Value, args []js.Value) interface{} {
 func draw(this js.Value, args []js.Value) interface{} {
 	ctx.Call("clearRect", 0, 0, canvasWidth, canvasHeight)
 	drawBall()
-	drawPaddle()
+	drawTopPaddle()
+	drawBottomPaddle()
 
 	if x > canvasWidth-ballRadius || x < ballRadius {
 		dx = -dx
@@ -97,9 +98,17 @@ func drawBall() {
 	ctx.Call("closePath")
 }
 
-func drawPaddle() {
+func drawTopPaddle() {
 	ctx.Call("beginPath")
 	ctx.Call("rect", paddleX, canvasHeight-paddleHeight, paddleWidth, paddleHeight)
+	ctx.Set("fillStyle", paddleColor)
+	ctx.Call("fill")
+	ctx.Call("closePath")
+}
+
+func drawBottomPaddle() {
+	ctx.Call("beginPath")
+	ctx.Call("rect", paddleX, paddleHeight, paddleWidth, paddleHeight)
 	ctx.Set("fillStyle", paddleColor)
 	ctx.Call("fill")
 	ctx.Call("closePath")
