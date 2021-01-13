@@ -6,67 +6,67 @@ import (
 )
 
 type info struct {
-	document js.Value
-	canvas js.Value
-	ctx js.Value
-	interval js.Value
-	canvasWidth int
-	canvasHeight int
-	ballRadius int
-	x int
-	y int
-	dx int
-	dy int
-	paddleWidth int
-	paddleHeight int
-	paddleTopX int
+	document      js.Value
+	canvas        js.Value
+	ctx           js.Value
+	interval      js.Value
+	canvasWidth   int
+	canvasHeight  int
+	ballRadius    int
+	x             int
+	y             int
+	dx            int
+	dy            int
+	paddleWidth   int
+	paddleHeight  int
+	paddleTopX    int
 	paddleBottomX int
-	paddleColor string
-	ballColor string
-	rightPressed bool
-	leftPressed bool
+	paddleColor   string
+	ballColor     string
+	rightPressed  bool
+	leftPressed   bool
 }
 
 func main() {
-	document                  := js.Global().Get("document")
-	canvas                    := document.Call("getElementById", "canvas")
-	ctx                       := canvas.Call("getContext", "2d")
-	interval                  := js.Null()
-	canvasWidth               := canvas.Get("width").Int()
-	canvasHeight              := canvas.Get("height").Int()
-	ballRadius                := 10
-	x                         := canvasWidth / 2
-	y                         := canvasHeight - 30
-	dx                        := 2
-	dy                        := -2
-	paddleWidth               := 75
-	paddleHeight              := 10
-	paddleTopX, paddleBottomX := (canvasWidth - paddleWidth) / 2, (canvasWidth - paddleWidth) / 2
-	paddleColor               := "#141414"
-	ballColor                 := "#d0d0cf"
-	rightPressed              := false
-	leftPressed               := false
+	document := js.Global().Get("document")
+	canvas := document.Call("getElementById", "canvas")
+	ctx := canvas.Call("getContext", "2d")
+	interval := js.Null()
+	canvasWidth := canvas.Get("width").Int()
+	canvasHeight := canvas.Get("height").Int()
+	ballRadius := 10
+	x := canvasWidth / 2
+	y := canvasHeight - 30
+	dx := 2
+	dy := -2
+	paddleWidth := 75
+	paddleHeight := 10
+	paddleTopX, paddleBottomX := (canvasWidth-paddleWidth)/2, (canvasWidth-paddleWidth)/2
+	paddleColor := "#141414"
+	ballColor := "#d0d0cf"
+	rightPressed := false
+	leftPressed := false
 
 	i := info{
-		document: document,
-		canvas: canvas,
-		ctx: ctx,
-		interval: interval,
-		canvasWidth: canvasWidth,
-		canvasHeight: canvasHeight,
-		ballRadius: ballRadius,
-		x: x,
-		y: y,
-		dx: dx,
-		dy: dy,
-		paddleWidth: paddleWidth,
-		paddleHeight: paddleHeight,
-		paddleTopX: paddleTopX,
+		document:      document,
+		canvas:        canvas,
+		ctx:           ctx,
+		interval:      interval,
+		canvasWidth:   canvasWidth,
+		canvasHeight:  canvasHeight,
+		ballRadius:    ballRadius,
+		x:             x,
+		y:             y,
+		dx:            dx,
+		dy:            dy,
+		paddleWidth:   paddleWidth,
+		paddleHeight:  paddleHeight,
+		paddleTopX:    paddleTopX,
 		paddleBottomX: paddleBottomX,
-		paddleColor: paddleColor,
-		ballColor: ballColor,
-		rightPressed: rightPressed,
-		leftPressed: leftPressed,
+		paddleColor:   paddleColor,
+		ballColor:     ballColor,
+		rightPressed:  rightPressed,
+		leftPressed:   leftPressed,
 	}
 
 	drawCb := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
@@ -75,24 +75,22 @@ func main() {
 		return nil
 	})
 
-	keyDownHandlerCb := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		key := args[0].Get("key").String()
-                keyDownHandler(&i, key)
-
-                return nil
-        })
-
-	keyUpHandlerCb := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-                key := args[0].Get("key").String()
-                keyUpHandler(&i, key)
-
-                return nil
-        })
+	keyDownHandlerCb := createKeyEventListener(&i, keyDownHandler)
+	keyUpHandlerCb := createKeyEventListener(&i, keyUpHandler)
 
 	i.interval = js.Global().Call("setInterval", drawCb, 10)
 	document.Call("addEventListener", "keydown", keyDownHandlerCb, false)
 	document.Call("addEventListener", "keyup", keyUpHandlerCb, false)
 	select {}
+}
+
+func createKeyEventListener(i *info, keyHandler func(*info, string)) js.Func {
+	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		key := args[0].Get("key").String()
+		keyHandler(i, key)
+
+		return nil
+	})
 }
 
 func keyDownHandler(i *info, key string) {

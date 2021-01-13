@@ -8,5 +8,5 @@ import "net/http"
 // 3. Make it work with tinygo
 
 func main() {
-	 _ = http.ListenAndServeTLS(":8080", "security/cert.pem", "security/cert.key", http.FileServer(http.Dir("./static")))
+	_ = http.ListenAndServeTLS(":8080", "security/cert.pem", "security/cert.key", http.FileServer(http.Dir("./static")))
 }
