@@ -22,14 +22,13 @@ var (
 	ballColor                 = "#d0d0cf"
 	rightPressed              = false
 	leftPressed               = false
-	isDone                    = make(chan bool)
 )
 
 func main() {
 	interval = js.Global().Call("setInterval", js.FuncOf(draw), 10)
 	document.Call("addEventListener", "keydown", js.FuncOf(keyDownHandler), false)
 	document.Call("addEventListener", "keyup", js.FuncOf(keyUpHandler), false)
-	<-isDone
+	select {}
 }
 
 func keyDownHandler(this js.Value, args []js.Value) interface{} {
