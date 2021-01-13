@@ -1,114 +1,166 @@
 package main
 
-import "syscall/js"
-
-var (
-	math                      = js.Global().Get("Math")
-	document                  = js.Global().Get("document")
-	canvas                    = document.Call("getElementById", "canvas")
-	ctx                       = canvas.Call("getContext", "2d")
-	interval                  = js.Null()
-	canvasWidth               = canvas.Get("width").Int()
-	canvasHeight              = canvas.Get("height").Int()
-	ballRadius                = 10
-	x                         = canvasWidth / 2
-	y                         = canvasHeight - 30
-	dx                        = 2
-	dy                        = -2
-	paddleWidth               = 75
-	paddleHeight              = 10
-	paddleTopX, paddleBottomX = (canvasWidth - paddleWidth) / 2, (canvasWidth - paddleWidth) / 2
-	paddleColor               = "#141414"
-	ballColor                 = "#d0d0cf"
-	rightPressed              = false
-	leftPressed               = false
+import (
+	"math"
+	"syscall/js"
 )
 
+type info struct {
+	document js.Value
+	canvas js.Value
+	ctx js.Value
+	interval js.Value
+	canvasWidth int
+	canvasHeight int
+	ballRadius int
+	x int
+	y int
+	dx int
+	dy int
+	paddleWidth int
+	paddleHeight int
+	paddleTopX int
+	paddleBottomX int
+	paddleColor string
+	ballColor string
+	rightPressed bool
+	leftPressed bool
+}
+
 func main() {
-	interval = js.Global().Call("setInterval", js.FuncOf(draw), 10)
-	document.Call("addEventListener", "keydown", js.FuncOf(keyDownHandler), false)
-	document.Call("addEventListener", "keyup", js.FuncOf(keyUpHandler), false)
+	document                  := js.Global().Get("document")
+	canvas                    := document.Call("getElementById", "canvas")
+	ctx                       := canvas.Call("getContext", "2d")
+	interval                  := js.Null()
+	canvasWidth               := canvas.Get("width").Int()
+	canvasHeight              := canvas.Get("height").Int()
+	ballRadius                := 10
+	x                         := canvasWidth / 2
+	y                         := canvasHeight - 30
+	dx                        := 2
+	dy                        := -2
+	paddleWidth               := 75
+	paddleHeight              := 10
+	paddleTopX, paddleBottomX := (canvasWidth - paddleWidth) / 2, (canvasWidth - paddleWidth) / 2
+	paddleColor               := "#141414"
+	ballColor                 := "#d0d0cf"
+	rightPressed              := false
+	leftPressed               := false
+
+	i := info{
+		document: document,
+		canvas: canvas,
+		ctx: ctx,
+		interval: interval,
+		canvasWidth: canvasWidth,
+		canvasHeight: canvasHeight,
+		ballRadius: ballRadius,
+		x: x,
+		y: y,
+		dx: dx,
+		dy: dy,
+		paddleWidth: paddleWidth,
+		paddleHeight: paddleHeight,
+		paddleTopX: paddleTopX,
+		paddleBottomX: paddleBottomX,
+		paddleColor: paddleColor,
+		ballColor: ballColor,
+		rightPressed: rightPressed,
+		leftPressed: leftPressed,
+	}
+
+	drawCb := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		draw(&i)
+
+		return nil
+	})
+
+	keyDownHandlerCb := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		key := args[0].Get("key").String()
+                keyDownHandler(&i, key)
+
+                return nil
+        })
+
+	keyUpHandlerCb := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+                key := args[0].Get("key").String()
+                keyUpHandler(&i, key)
+
+                return nil
+        })
+
+	i.interval = js.Global().Call("setInterval", drawCb, 10)
+	document.Call("addEventListener", "keydown", keyDownHandlerCb, false)
+	document.Call("addEventListener", "keyup", keyUpHandlerCb, false)
 	select {}
 }
 
-func keyDownHandler(this js.Value, args []js.Value) interface{} {
-	event := args[0]
-	key := event.Get("key").String()
-
+func keyDownHandler(i *info, key string) {
 	if key == "Right" || key == "ArrowRight" {
-		rightPressed = true
+		i.rightPressed = true
 	} else if key == "Left" || key == "ArrowLeft" {
-		leftPressed = true
+		i.leftPressed = true
 	}
-
-	return nil
 }
 
-func keyUpHandler(this js.Value, args []js.Value) interface{} {
-	event := args[0]
-	key := event.Get("key").String()
-
+func keyUpHandler(i *info, key string) {
 	if key == "Right" || key == "ArrowRight" {
-		rightPressed = false
+		i.rightPressed = false
 	} else if key == "Left" || key == "ArrowLeft" {
-		leftPressed = false
+		i.leftPressed = false
 	}
-
-	return nil
 }
 
-func draw(this js.Value, args []js.Value) interface{} {
-	ctx.Call("clearRect", 0, 0, canvasWidth, canvasHeight)
-	drawBall()
-	drawPaddle(paddleTopX, 0)
-	drawPaddle(paddleBottomX, canvasHeight-paddleHeight)
+func draw(i *info) {
+	i.ctx.Call("clearRect", 0, 0, i.canvasWidth, i.canvasHeight)
+	drawBall(i)
+	drawPaddle(i.paddleTopX, 0, i)
+	drawPaddle(i.paddleBottomX, i.canvasHeight-i.paddleHeight, i)
 
-	if x > canvasWidth-ballRadius || x < ballRadius {
-		dx = -dx
+	if i.x > i.canvasWidth-i.ballRadius || i.x < i.ballRadius {
+		i.dx = -i.dx
 	}
 
-	if shouldRevertBallByY() {
-		dy = -dy
+	if shouldRevertBallByY(i) {
+		i.dy = -i.dy
 	}
 
-	if y+ballRadius > canvasHeight-paddleHeight || y-ballRadius < paddleHeight {
+	if i.y+i.ballRadius > i.canvasHeight-i.paddleHeight || i.y-i.ballRadius < i.paddleHeight {
 		js.Global().Call("alert", "GAME OVER")
-		document.Get("location").Call("reload")
-		js.Global().Call("clearInterval", interval)
+		i.document.Get("location").Call("reload")
+		js.Global().Call("clearInterval", i.interval)
 	}
 
-	if rightPressed && paddleBottomX < canvasWidth-paddleWidth {
-		paddleBottomX += 7
-	} else if leftPressed && paddleBottomX > 0 {
-		paddleBottomX -= 7
+	if i.rightPressed && i.paddleBottomX < i.canvasWidth-i.paddleWidth {
+		i.paddleBottomX += 7
+	} else if i.leftPressed && i.paddleBottomX > 0 {
+		i.paddleBottomX -= 7
 	}
 
-	x += dx
-	y += dy
-
-	return nil
+	i.x += i.dx
+	i.y += i.dy
 }
 
-func shouldRevertBallByY() bool {
-	isBallTouchedTopPaddle := x >= paddleTopX && x <= paddleTopX+paddleWidth && y-ballRadius <= paddleHeight
+func shouldRevertBallByY(i *info) bool {
+	isBallTouchedTopPaddle := i.x >= i.paddleTopX && i.x <= i.paddleTopX+i.paddleWidth && i.y-i.ballRadius <= i.paddleHeight
 
-	isBallTouchedBottomPaddle := x >= paddleBottomX && x <= paddleBottomX+paddleWidth && y+ballRadius >= canvasHeight-paddleHeight
+	isBallTouchedBottomPaddle := i.x >= i.paddleBottomX && i.x <= i.paddleBottomX+i.paddleWidth && i.y+i.ballRadius >= i.canvasHeight-i.paddleHeight
 
 	return isBallTouchedTopPaddle || isBallTouchedBottomPaddle
 }
 
-func drawBall() {
-	ctx.Call("beginPath")
-	ctx.Call("arc", x, y, ballRadius, 0, math.Get("PI").Int()*2)
-	ctx.Set("fillStyle", ballColor)
-	ctx.Call("fill")
-	ctx.Call("closePath")
+func drawBall(i *info) {
+	i.ctx.Call("beginPath")
+	i.ctx.Call("arc", i.x, i.y, i.ballRadius, 0, math.Pi*2)
+	i.ctx.Set("fillStyle", i.ballColor)
+	i.ctx.Call("fill")
+	i.ctx.Call("closePath")
 }
 
-func drawPaddle(x, y int) {
-	ctx.Call("beginPath")
-	ctx.Call("rect", x, y, paddleWidth, paddleHeight)
-	ctx.Set("fillStyle", paddleColor)
-	ctx.Call("fill")
-	ctx.Call("closePath")
+func drawPaddle(x, y int, i *info) {
+	i.ctx.Call("beginPath")
+	i.ctx.Call("rect", x, y, i.paddleWidth, i.paddleHeight)
+	i.ctx.Set("fillStyle", i.paddleColor)
+	i.ctx.Call("fill")
+	i.ctx.Call("closePath")
 }
