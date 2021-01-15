@@ -2,6 +2,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"syscall/js"
 )
@@ -82,6 +83,7 @@ func main() {
 	i.interval = js.Global().Call("setInterval", drawCb, 10)
 	document.Call("addEventListener", "keydown", keyDownHandlerCb, false)
 	document.Call("addEventListener", "keyup", keyUpHandlerCb, false)
+	runSse()
 	select {}
 }
 
@@ -162,4 +164,9 @@ func drawPaddle(x, y int, i *info) {
 	i.ctx.Set("fillStyle", i.paddleColor)
 	i.ctx.Call("fill")
 	i.ctx.Call("closePath")
+}
+
+func runSse() {
+	sse := js.Global().Get("window").Get("EventSource").New("https://localhost/sse")
+	fmt.Println(sse)
 }

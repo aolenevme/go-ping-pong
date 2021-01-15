@@ -1,4 +1,5 @@
 /sketch
 /security
 *.swp
+*.wasm
 go.sum
