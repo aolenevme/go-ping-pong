@@ -167,6 +167,15 @@ func drawPaddle(x, y int, i *info) {
 }
 
 func runSse() {
-	sse := js.Global().Get("window").Get("EventSource").New("https://localhost/sse")
-	fmt.Println(sse)
+	sse := js.Global().Get("window").Get("EventSource").New("api/v1/sse")
+
+	msgCb := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		event := args[0]
+
+		fmt.Println(event.Get("data"))
+
+		return nil
+	})
+
+	sse.Call("addEventListener", "message", msgCb)
 }
