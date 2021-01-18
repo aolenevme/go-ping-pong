@@ -169,6 +169,28 @@ func drawPaddle(x, y int, i *info) {
 func runSse() {
 	sse := js.Global().Get("window").Get("EventSource").New("api/v1/sse")
 
+	openCb := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		fmt.Println("Stream is open")
+
+		return nil
+	})
+
+	errorCb := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		es := js.Global().Get("window").Get("EventSource")
+		rs := args[0].Get("target").Get("readyState").String()
+
+		switch rs {
+			case es.Get("CONNECTING").String():
+				fmt.Println("Reconnecting...")
+			case es.Get("CLOSED").String():
+				fmt.Println("Connection failed, will not reconnect")
+			default:
+				fmt.Println("Unknown error")
+		}
+
+		return nil
+	})
+
 	msgCb := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		event := args[0]
 
@@ -177,5 +199,7 @@ func runSse() {
 		return nil
 	})
 
+	sse.Call("addEventListener", "open", openCb)
+	sse.Call("addEventListener", "error", errorCb)
 	sse.Call("addEventListener", "message", msgCb)
 }
