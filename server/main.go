@@ -14,6 +14,8 @@ func main() {
 		switch r.Method {
 		case "GET":
 			sseHandshake(w, r)
+		case "PUT":
+			sseClientPosition(w, r)
 		default:
 			http.Error(w, "Not Found", http.StatusNotFound)
 		}
@@ -37,4 +39,8 @@ func sseHandshake(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(10 * time.Millisecond)
 		lastEventId++
 	}
+}
+
+func sseClientPosition(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "PUT")
 }
