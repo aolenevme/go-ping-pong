@@ -4,7 +4,9 @@ Brainstorm
 	1.1. NO_INTERNET // readyState.CLOSED
 	1.2. NO_SSE_CONNECTION // readyState.CONNECTING
 	1.3. IN_GAME
-	1.4. GAME_OVER
+	1.4. YOU_LOST
+	1.5. YOU_WON
+	1.6. WAITING_COMPETITOR
 
 2. Данные в SSE:
 	2.1. Передача положения x,y твоего весла на сервер. *POST /api/v1/sse/data*
