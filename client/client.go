@@ -127,8 +127,8 @@ func draw(i *info) {
 	}
 
 	if i.y+i.ballRadius > i.canvasHeight-i.paddleHeight || i.y-i.ballRadius < i.paddleHeight {
-		js.Global().Call("alert", "GAME OVER")
-		i.document.Get("location").Call("reload")
+		//js.Global().Call("alert", "GAME OVER")
+		//i.document.Get("location").Call("reload")
 		js.Global().Call("clearInterval", i.interval)
 	}
 
