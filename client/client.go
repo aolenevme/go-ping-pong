@@ -194,7 +194,7 @@ func runSse() {
 	msgCb := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		event := args[0]
 
-		fmt.Println(event.Get("data"))
+		fmt.Println(event.Get("data"), event.Get("lastEventId"))
 
 		return nil
 	})
