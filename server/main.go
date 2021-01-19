@@ -32,11 +32,11 @@ type Game struct {
 }
 
 type UiElement struct {
-	x int
-	y int
+	X int
+	Y int
 }
 
-var game = Game{UiElement{-1,-1}, UiElement{-1,-1}, UiElement{x: 0, y: 0}, WaitingCompetitor}
+var game = Game{UiElement{-1,-1}, UiElement{-1,-1}, UiElement{0, 0}, WaitingCompetitor}
 
 func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Connection", "keep-alive")
@@ -58,14 +58,10 @@ func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 }
 
 func sseGetInformation(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "PUT")
-		// 1. Есть игра
-		// 2. Грузится игра. Игра инициализирует handshake: /api/v1/sse. Сервер создает Competitor. В структуру Game добавляется competitor. Competitor сохраняет w и r в своей структуре. Возвращает статус WAITING_COMPETITOR игра, которая рисует соответствующий интерфейс
-		// 3. Грузится второй соперник. Все то же самое, что и в пункте 2, однако возвращается статус IN_GAME обоим конкурентам
-		// 4. Сервер начинает слать обоим конкурентам положение мяча и положение конкурентов из Competitor.paddleX и Competitor.paddleY
-		// 5. Сервер начинает принимать положения конкурентов и записывать их в Competitor.paddleX и Competitor.paddleY
-		// 6. Когда шарик улетел за границу одного из игроков, отправляется статус YOU_LOST или YOU_WON - и отрисовывается соответсвующий UI с предложением повторить. Происходит обнуление структур Competitor
-		// 7. После клика на кнопки Повторить все повторяется с пункта (1) 
+	game.FirstCompetitor.X += 1
+	game.FirstCompetitor.Y += 1
+	fmt.Printf("%+v", game)
+	w.WriteHeader(http.StatusOK)
 }
 
 func main() {
