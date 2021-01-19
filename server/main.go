@@ -15,8 +15,6 @@ import (
 // 	2.1. method send -- ballX, ballY, enemyX, enemyY
 // 	2.2. method accept -- clientX, clientY
 
-var lastEventId = 1
-
 var game []Competitor
 
 type Competitor struct {
@@ -46,10 +44,11 @@ func main() {
 }
 
 func sseHandshake(w http.ResponseWriter, r *http.Request) {
+	lastEventId := 1
+
 	w.Header().Set("Connection", "keep-alive")
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Last-Event-ID", strconv.Itoa(lastEventId))
-
 
 	if len(game) < 2 {
 		game = append(game, Competitor{w, r, 0, 0})
