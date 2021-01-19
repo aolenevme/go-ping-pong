@@ -180,12 +180,12 @@ func runSse() {
 		rs := args[0].Get("target").Get("readyState").String()
 
 		switch rs {
-			case es.Get("CONNECTING").String():
-				fmt.Println("Reconnecting...")
-			case es.Get("CLOSED").String():
-				fmt.Println("Connection failed, will not reconnect")
-			default:
-				fmt.Println("Unknown error")
+		case es.Get("CONNECTING").String():
+			fmt.Println("Reconnecting...")
+		case es.Get("CLOSED").String():
+			fmt.Println("Connection failed, will not reconnect")
+		default:
+			fmt.Println("Unknown error")
 		}
 
 		return nil

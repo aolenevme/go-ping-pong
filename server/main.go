@@ -19,16 +19,16 @@ type GameStatus string
 
 const (
 	WaitingCompetitor GameStatus = "WAITING_COMPETITOR"
-	InGame GameStatus = "IN_GAME"
-	YouWon GameStatus = "YOU_WON"
-	YouLost GameStatus = "YOU_LOST"
+	InGame            GameStatus = "IN_GAME"
+	YouWon            GameStatus = "YOU_WON"
+	YouLost           GameStatus = "YOU_LOST"
 )
 
 type Game struct {
-	FirstCompetitor UiElement
+	FirstCompetitor  UiElement
 	SecondCompetitor UiElement
-	Ball UiElement
-	Status GameStatus
+	Ball             UiElement
+	Status           GameStatus
 }
 
 type UiElement struct {
@@ -36,13 +36,13 @@ type UiElement struct {
 	Y int
 }
 
-var game = Game{UiElement{-1,-1}, UiElement{-1,-1}, UiElement{0, 0}, WaitingCompetitor}
+var game = Game{UiElement{-1, -1}, UiElement{-1, -1}, UiElement{0, 0}, WaitingCompetitor}
 
 func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Connection", "keep-alive")
 	w.Header().Set("Content-Type", "text/event-stream")
 
-	if (game.FirstCompetitor == UiElement{-1,-1}) {
+	if (game.FirstCompetitor == UiElement{-1, -1}) {
 		game.FirstCompetitor = UiElement{0, 0}
 	} else if (game.SecondCompetitor == UiElement{-1, -1}) {
 		game.SecondCompetitor = UiElement{0, 0}
