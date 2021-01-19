@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 // 1. Interface Connection
@@ -14,28 +15,15 @@ import (
 // 	2.1. method send -- ballX, ballY, enemyX, enemyY
 // 	2.2. method accept -- clientX, clientY
 
-var games map[gameId]Game
+var lastEventId = 1
 
-type gameId = string
-
-type Game struct {
-	competitor1 Competitor
-	competitor2 Competitor
-}
+var game []Competitor
 
 type Competitor struct {
 	w http.ResponseWriter
 	r *http.Request
 	paddleX int
 	paddleY int
-}
-
-func (Competitor c) send(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln("%v send\n", c)
-}
-
-func (Competitor c) accept(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln("%v accept\n", c)
 }
 
 func main() {
@@ -62,14 +50,17 @@ func sseHandshake(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Last-Event-ID", strconv.Itoa(lastEventId))
 
-	/*
+
+	if len(game) < 2 {
+		game = append(game, Competitor{w, r, 0, 0})
+	}
+
 	for {
-		fmt.Fprintf(w, "id: %d\ndata: Hey\n\n", lastEventId)
+		fmt.Fprintf(w, "id: %d\ndata: %+v\n\n", lastEventId, game)
 		w.(http.Flusher).Flush()
 		time.Sleep(10 * time.Millisecond)
 		lastEventId++
 	}
-	*/
 }
 
 func sseClientPosition(w http.ResponseWriter, r *http.Request) {
