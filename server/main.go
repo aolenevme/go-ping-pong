@@ -14,7 +14,7 @@ import (
 // 	2.1. method send -- ballX, ballY, enemyX, enemyY
 // 	2.2. method accept -- clientX, clientY
 
-var gameStatus = "WAITING"
+var gameStatus = "WAITING_COMPETITOR"
 
 var game []Competitor
 
@@ -25,7 +25,7 @@ type Competitor struct {
 	paddleY int
 }
 
-func sseHandshake(w http.ResponseWriter, r *http.Request) {
+func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Connection", "keep-alive")
 	w.Header().Set("Content-Type", "text/event-stream")
 
@@ -42,7 +42,7 @@ func sseHandshake(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func sseClientPosition(w http.ResponseWriter, r *http.Request) {
+func sseGetInformation(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "PUT")
 		// 1. Есть игра
 		// 2. Грузится игра. Игра инициализирует handshake: /api/v1/sse. Сервер создает Competitor. В структуру Game добавляется competitor. Competitor сохраняет w и r в своей структуре. Возвращает статус WAITING_COMPETITOR игра, которая рисует соответствующий интерфейс
@@ -57,9 +57,9 @@ func main() {
 	sse := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
-			sseHandshake(w, r)
+			sseSendInformation(w, r)
 		case "PUT":
-			sseClientPosition(w, r)
+			sseGetInformation(w, r)
 		default:
 			http.Error(w, "Not Found", http.StatusNotFound)
 		}
