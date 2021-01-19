@@ -55,7 +55,6 @@ func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 
 		// НИЗКИЙ ПРИОРИТЕТ
 		// Отрисовать UI для всех статусов
-		// Надо научиться парсить json на фронте и тд.
 		<-r.Context().Done()
 		game.SecondCompetitor = UiElement{-1, -1}
 		game.Status = WaitingCompetitor

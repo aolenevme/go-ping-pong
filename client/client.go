@@ -192,9 +192,13 @@ func runSse() {
 	})
 
 	msgCb := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		event := args[0]
+		data := args[0].Get("data").String()
 
-		fmt.Println(event.Get("data"), event.Get("lastEventId"))
+		JSON := js.Global().Get("window").Get("JSON")
+
+		parsedData := JSON.Call("parse", data)
+
+		fmt.Println(parsedData.Get("Status").String())
 
 		return nil
 	})
