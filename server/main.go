@@ -49,6 +49,18 @@ func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 		game.Status = InGame
 	}
 
+	go func() {
+		// Улучшить инициализацию объекта game и процесс создания игрока
+		//  Добавить айдишники игрокам и переписать все это на FRP через TDD, учитывая все обновления структур. Монады?))
+
+		// НИЗКИЙ ПРИОРИТЕТ
+		// Отрисовать UI для всех статусов
+		// Надо научиться парсить json на фронте и тд.
+		<-r.Context().Done()
+		game.SecondCompetitor = UiElement{-1, -1}
+		game.Status = WaitingCompetitor
+	}()
+
 	for {
 		b, _ := json.Marshal(game)
 		fmt.Fprintf(w, "data: %s\n\n", b)
