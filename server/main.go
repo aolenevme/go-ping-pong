@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -14,29 +15,43 @@ import (
 // 	2.1. method send -- ballX, ballY, enemyX, enemyY
 // 	2.2. method accept -- clientX, clientY
 
-var gameStatus = "WAITING_COMPETITOR"
+type GameStatus string
 
-var game []Competitor
+const (
+	WaitingCompetitor GameStatus = "WAITING_COMPETITOR"
+	InGame GameStatus = "IN_GAME"
+	YouWon GameStatus = "YOU_WON"
+	YouLost GameStatus = "YOU_LOST"
+)
 
-type Competitor struct {
-	w http.ResponseWriter
-	r *http.Request
-	paddleX int
-	paddleY int
+type Game struct {
+	FirstCompetitor UiElement
+	SecondCompetitor UiElement
+	Ball UiElement
+	Status GameStatus
 }
+
+type UiElement struct {
+	x int
+	y int
+}
+
+var game = Game{UiElement{-1,-1}, UiElement{-1,-1}, UiElement{x: 0, y: 0}, WaitingCompetitor}
 
 func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Connection", "keep-alive")
 	w.Header().Set("Content-Type", "text/event-stream")
 
-	if len(game) < 1 {
-		game = append(game, Competitor{w, r, 0, 0})
-	} else {
-		gameStatus = "IN_GAME"
+	if (game.FirstCompetitor == UiElement{-1,-1}) {
+		game.FirstCompetitor = UiElement{0, 0}
+	} else if (game.SecondCompetitor == UiElement{-1, -1}) {
+		game.SecondCompetitor = UiElement{0, 0}
+		game.Status = InGame
 	}
 
 	for {
-		fmt.Fprintf(w, "data: %s\n\n", gameStatus)
+		b, _ := json.Marshal(game)
+		fmt.Fprintf(w, "data: %s\n\n", b)
 		w.(http.Flusher).Flush()
 		time.Sleep(time.Second)
 	}
