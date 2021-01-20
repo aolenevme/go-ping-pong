@@ -36,7 +36,7 @@ function draw() {
 	}
 
 	if ((y + ballRadius > canvas.height - paddleHeight) || (y - ballRadius) < paddleHeight) {
-		alert("Game Over!");
+		alert("Game Over");
 		document.location.reload();
 		clearInterval(interval);
 	}

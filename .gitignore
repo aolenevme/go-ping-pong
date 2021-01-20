@@ -1,4 +1,5 @@
 /sketch
 /security
+static/client.min.js
 *.swp
 go.sum
