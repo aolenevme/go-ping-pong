@@ -7,14 +7,6 @@ import (
 	"time"
 )
 
-// 1. Interface Connection
-// 	1.1. FirstClient Client
-// 	1.2. SecondClient Client
-
-// 2. Interface Client
-// 	2.1. method send -- ballX, ballY, enemyX, enemyY
-// 	2.2. method accept -- clientX, clientY
-
 type GameStatus string
 
 const (
@@ -50,11 +42,6 @@ func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go func() {
-		// Улучшить инициализацию объекта game и процесс создания игрока
-		//  Добавить айдишники игрокам и переписать все это на FRP через TDD, учитывая все обновления структур. Монады?))
-
-		// НИЗКИЙ ПРИОРИТЕТ
-		// Отрисовать UI для всех статусов
 		<-r.Context().Done()
 		game.SecondCompetitor = UiElement{-1, -1}
 		game.Status = WaitingCompetitor
