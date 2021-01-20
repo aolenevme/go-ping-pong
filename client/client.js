@@ -6,19 +6,20 @@ const paddleHeight = 10;
 const paddleColor = "#141414";
 const ballColor = "#d0d0cf";
 
+const DIRECTIONS = Object.freeze({
+        RIGHT: "RIGHT",
+        LEFT: "LEFT"
+});
 
-let x = canvas.width / 2;
-let y = canvas.height - 30;
-let dx = 2;
-let dy = -2;
-let paddleTopX = (canvas.width - paddleWidth) / 2;
-let paddleBottomX = (canvas.width - paddleWidth) / 2;
-let rightPressed = false;
-let leftPressed = false;
-
+let ballX = canvas.width / 2; // Ball.X
+let ballY = canvas.height - 30; // Ball.Y
+let dx = 2; // Убрать на сервер
+let dy = -2; // Убрать на сервер
+let paddleTopX = (canvas.width - paddleWidth) / 2; // FirstCompetitor.X
+let paddleBottomX = (canvas.width - paddleWidth) / 2; // SecondCompetitor.X
 let interval = setInterval(draw, 10);
+
 document.addEventListener("keydown", keyDownHandler, false);
-document.addEventListener("keyup", keyUpHandler, false);
 runSse();
 
 function draw() {
@@ -27,7 +28,7 @@ function draw() {
 	drawPaddle(paddleTopX, 0);
 	drawPaddle(paddleBottomX, canvas.height - paddleHeight)
 
-	if ((x > canvas.width - ballRadius) || x < ballRadius) {
+	if ((ballX > canvas.width - ballRadius) || ballX < ballRadius) {
 		dx = -dx;
 	}
 
@@ -35,7 +36,7 @@ function draw() {
 		dy = -dy;
 	}
 
-	if ((y + ballRadius > canvas.height - paddleHeight) || (y - ballRadius) < paddleHeight) {
+	if ((ballY + ballRadius > canvas.height - paddleHeight) || (ballY - ballRadius) < paddleHeight) {
 		alert("Game Over");
 		document.location.reload();
 		clearInterval(interval);
@@ -47,51 +48,44 @@ function draw() {
 		paddleBottomX -= 7;
 	}
 
-	x += dx;
-	y += dy;
+	ballX += dx;
+	ballY += dy;
 }
 
 function shouldRevertBallByY() {
-	const isBallTouchedTopPaddle = x >= paddleTopX && x < paddleTopX + paddleWidth && y - ballRadius <= paddleHeight;
-	const isBallTouchedBottomPaddle = x >= paddleBottomX && x < paddleBottomX + paddleWidth && y + ballRadius >= canvas.height - paddleHeight;
+	const isBallTouchedTopPaddle = ballX >= paddleTopX && ballX < paddleTopX + paddleWidth && ballY - ballRadius <= paddleHeight;
+	const isBallTouchedBottomPaddle = ballX >= paddleBottomX && ballX < paddleBottomX + paddleWidth && ballY + ballRadius >= canvas.height - paddleHeight;
 
 	return isBallTouchedTopPaddle || isBallTouchedBottomPaddle;
 }
 
 function drawBall() {
 	ctx.beginPath();
-	ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+	ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
 	ctx.fillStyle = ballColor;
 	ctx.fill();
 	ctx.closePath();
 }
 
-function drawPaddle(x = 0, y = 0) {
+function drawPaddle(paddleX = 0, paddleY = 0) {
 	ctx.beginPath();
-	ctx.rect(x, y, paddleWidth, paddleHeight);
+	ctx.rect(paddleX, paddleY, paddleWidth, paddleHeight);
 	ctx.fillStyle = paddleColor;
 	ctx.fill();
 	ctx.closePath();
 }
 
-function keyDownHandler(e = {}) {
-	const key = e.key;
+async function keyDownHandler(e = {}) {
+        const key = e.key;
+        let direction = DIRECTIONS.RIGHT;
 
-	if (key === "Right" || key === "ArrowRight") {
-		rightPressed = true;
-	} else if (key === "Left" || key === "ArrowLeft") {
-		leftPressed = true;
-	}
-}
+        if (key === "Right" || key === "ArrowRight") {
+                direction = DIRECTIONS.RIGHT;
+        } else if (key === "Left" || key === "ArrowLeft") {
+                direction = DIRECTIONS.LEFT;
+        }
 
-function keyUpHandler(e = {}) {
-	const key = e.key;
-
-	if (key === "Right" || key === "ArrowRight") {
-		rightPressed = false;
-	} else if (key === "Left" || key === "ArrowLeft") {
-		leftPressed = false;
-	}
+        await putData("api/v1/sse", { direction });
 }
 
 function runSse() {
@@ -118,7 +112,16 @@ function runSse() {
 
 	sse.addEventListener("message", e => {
 		const data = JSON.parse(e.data);
-		
-		console.dir(data);
+		paddleTopX = data.FirstCompetitor.X;
+		paddleBottomX = data.SecondCompetitor.X;
+
 	});
+}
+
+async function putData(url = "", data = {}) {
+  const response = await fetch(url, {
+    method: "PUT"
+  });
+
+  return await response.json();
 }

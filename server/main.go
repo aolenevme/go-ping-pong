@@ -51,13 +51,12 @@ func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 		b, _ := json.Marshal(game)
 		fmt.Fprintf(w, "data: %s\n\n", b)
 		w.(http.Flusher).Flush()
-		time.Sleep(time.Second)
+		time.Sleep(10 * time.Millisecond)
 	}
 }
 
 func sseGetInformation(w http.ResponseWriter, r *http.Request) {
-	game.FirstCompetitor.X += 1
-	game.FirstCompetitor.Y += 1
+	game.FirstCompetitor.X += 7
 	fmt.Printf("%+v", game)
 	w.WriteHeader(http.StatusOK)
 }
