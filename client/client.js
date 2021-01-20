@@ -120,7 +120,11 @@ function runSse() {
 
 async function putData(url = "", data = {}) {
   const response = await fetch(url, {
-    method: "PUT"
+	  method: "PUT",
+	  headers: {
+		  "Content-Type": "application/json"
+	  },
+	  body: JSON.stringify(data)
   });
 
   return await response.json();

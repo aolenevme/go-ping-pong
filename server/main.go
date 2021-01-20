@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"time"
 )
@@ -26,6 +27,10 @@ type Game struct {
 type UiElement struct {
 	X int
 	Y int
+}
+
+type request struct {
+	Direction string `json:"direction"`
 }
 
 var game = Game{UiElement{-1, -1}, UiElement{-1, -1}, UiElement{0, 0}, WaitingCompetitor}
@@ -56,8 +61,27 @@ func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 }
 
 func sseGetInformation(w http.ResponseWriter, r *http.Request) {
-	game.FirstCompetitor.X += 7
-	fmt.Printf("%+v", game)
+	var req request
+
+	b, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	err = json.Unmarshal(b, &req)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	if req.Direction == "RIGHT" {
+		game.FirstCompetitor.X += 7
+	} else if req.Direction == "LEFT" {
+		game.FirstCompetitor.X -= 7
+	}
+
 	w.WriteHeader(http.StatusOK)
 }
 
