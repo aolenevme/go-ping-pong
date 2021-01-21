@@ -8,8 +8,6 @@ const DIRECTIONS = Object.freeze({
         LEFT: "LEFT"
 });
 
-let dx = 2; // Убрать на сервер
-let dy = -2; // Убрать на сервер
 let game = {};
 
 document.addEventListener("keydown", keyDownHandler, false);
@@ -20,29 +18,6 @@ function draw() {
 	drawBall();
 	drawPaddle(game.paddleTopX, 0);
 	drawPaddle(game.paddleBottomX, game.canvasHeight - game.paddleHeight)
-
-	if ((game.ballX > game.canvasWidth - game.ballRadius) || game.ballX < game.ballRadius) {
-		dx = -dx;
-	}
-
-	if (shouldRevertBallByY()) {
-		dy = -dy;
-	}
-
-	if ((game.ballY + game.ballRadius > game.canvasHeight - game.paddleHeight) || (game.ballY - game.ballRadius) < game.paddleHeight) {
-		//alert("Game Over");
-		//document.location.reload();
-	}
-
-	game.ballX += dx;
-	game.ballY += dy;
-}
-
-function shouldRevertBallByY() {
-	const isBallTouchedTopPaddle = game.ballX >= game.paddleTopX && game.ballX < game.paddleTopX + game.paddleWidth && game.ballY - game.ballRadius <= game.paddleHeight;
-	const isBallTouchedBottomPaddle = game.ballX >= game.paddleBottomX && game.ballX < game.paddleBottomX + game.paddleWidth && game.ballY + game.ballRadius >= game.canvasHeight - game.paddleHeight;
-
-	return isBallTouchedTopPaddle || isBallTouchedBottomPaddle;
 }
 
 function drawBall() {

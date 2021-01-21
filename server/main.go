@@ -32,8 +32,7 @@ type Game struct {
 const (
 	WaitingCompetitor GameStatus = "WAITING_COMPETITOR"
 	InGame            GameStatus = "IN_GAME"
-	YouWon            GameStatus = "YOU_WON"
-	YouLost           GameStatus = "YOU_LOST"
+	GameOver          GameStatus = "GAME_OVER"
 )
 
 var (
@@ -61,11 +60,34 @@ func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	for {
+		if game.BallY > game.CanvasWidth-game.BallRadius || game.BallX < game.BallRadius {
+			ballDX = -ballDX
+		}
+
+		if shouldReverBallByY() {
+			ballDY = -ballDY
+		}
+
+		if game.BallY+game.BallRadius > game.CanvasHeight-game.PaddleHeight || game.BallY-game.BallRadius < game.PaddleHeight {
+			game.Status = GameOver
+		}
+
+		game.BallX += ballDX
+		game.BallY += ballDY
+
 		jsonPayload, _ := json.Marshal(game)
 		fmt.Fprintf(w, "data: %s\n\n", jsonPayload)
 		w.(http.Flusher).Flush()
 		time.Sleep(10 * time.Millisecond)
 	}
+}
+
+func shouldReverBallByY() bool {
+	isBallTouchedTopPaddle := game.BallX >= game.PaddleTopX && game.BallX < game.PaddleTopX+game.PaddleWidth && game.BallY-game.BallRadius <= game.PaddleHeight
+
+	isBallTouchedBottomPaddle := game.BallX >= game.PaddleBottomX && game.BallX < game.PaddleBottomX+game.PaddleWidth && game.BallY+game.BallRadius >= game.CanvasHeight-game.PaddleHeight
+
+	return isBallTouchedTopPaddle || isBallTouchedBottomPaddle
 }
 
 func sseGetInformation(w http.ResponseWriter, r *http.Request) {
