@@ -15,17 +15,17 @@ type request struct {
 }
 
 type Game struct {
-	BallX int `json:"ballX"`
-	BallY int `json:"ballY"`
-	CanvasWidth int `json:"canvasWidth"`
-	CanvasHeight int `json:"canvasHeight"`
-	PaddleTopX int `json:"paddleTopX"`
-	PaddleBottomX int `json:"paddleBottomX"`
-	PaddleTopY int `json:"paddleTopY"`
-	PaddleBottomY int `json:"paddleBottomY"`
-	PaddleWidth int `json:"paddleWidth"`
-	PaddleHeight int `json:"paddleHeight"`
-	Status GameStatus `json:"status"`
+	BallX         int        `json:"ballX"`
+	BallY         int        `json:"ballY"`
+	CanvasWidth   int        `json:"canvasWidth"`
+	CanvasHeight  int        `json:"canvasHeight"`
+	PaddleTopX    int        `json:"paddleTopX"`
+	PaddleBottomX int        `json:"paddleBottomX"`
+	PaddleTopY    int        `json:"paddleTopY"`
+	PaddleBottomY int        `json:"paddleBottomY"`
+	PaddleWidth   int        `json:"paddleWidth"`
+	PaddleHeight  int        `json:"paddleHeight"`
+	Status        GameStatus `json:"status"`
 }
 
 const (
@@ -37,9 +37,9 @@ const (
 
 var (
 	activeClients = 0
-	ballDX = 2
-	ballDY = -2
-	game Game
+	ballDX        = 2
+	ballDY        = -2
+	game          Game
 )
 
 func sseSendInformation(w http.ResponseWriter, r *http.Request) {
@@ -83,7 +83,7 @@ func sseGetInformation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Direction == "RIGHT" && (game.PaddleBottomX < game.CanvasWidth - game.PaddleWidth) {
+	if req.Direction == "RIGHT" && (game.PaddleBottomX < game.CanvasWidth-game.PaddleWidth) {
 		game.PaddleTopX += 7
 	} else if req.Direction == "LEFT" && game.PaddleTopX > 0 {
 		game.PaddleTopX -= 7
@@ -99,17 +99,17 @@ func main() {
 	paddleHeight := 10
 
 	game = Game{
-		BallX: canvasWidth/2,
-		BallY: canvasHeight-30,
-		CanvasWidth: canvasWidth,
-		CanvasHeight: canvasHeight,
-		PaddleTopX: (canvasWidth-paddleWidth)/2,
-		PaddleBottomX: (canvasWidth-paddleWidth)/2,
-		PaddleTopY: 0,
-		PaddleBottomY: canvasHeight-paddleHeight,
-		PaddleWidth: 75,
-		PaddleHeight: 10,
-		Status: WaitingCompetitor,
+		BallX:         canvasWidth / 2,
+		BallY:         canvasHeight - 30,
+		CanvasWidth:   canvasWidth,
+		CanvasHeight:  canvasHeight,
+		PaddleTopX:    (canvasWidth - paddleWidth) / 2,
+		PaddleBottomX: (canvasWidth - paddleWidth) / 2,
+		PaddleTopY:    0,
+		PaddleBottomY: canvasHeight - paddleHeight,
+		PaddleWidth:   75,
+		PaddleHeight:  10,
+		Status:        WaitingCompetitor,
 	}
 
 	sse := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

@@ -1,8 +1,6 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const ballRadius = 10;
-const paddleWidth = 75;
-const paddleHeight = 10;
 const paddleColor = "#141414";
 const ballColor = "#d0d0cf";
 
@@ -11,23 +9,33 @@ const DIRECTIONS = Object.freeze({
         LEFT: "LEFT"
 });
 
-let ballX = canvas.width / 2; // Ball.X
-let ballY = canvas.height - 30; // Ball.Y
 let dx = 2; // Убрать на сервер
 let dy = -2; // Убрать на сервер
-let paddleTopX = (canvas.width - paddleWidth) / 2; // FirstCompetitor.X
-let paddleBottomX = (canvas.width - paddleWidth) / 2; // SecondCompetitor.X
+
+let game = {
+	ballX: 160,
+	ballY: 130,
+	canvasHeight: 160,
+	canvasWidth: 320,
+	paddleBottomX: 122,
+	paddleBottomY: 150,
+	paddleHeight: 10,
+	paddleTopX: 122,
+	paddleTopY: 0,
+	paddleWidth: 75,
+	status: "WAITING_COMPETITOR"
+};
 
 document.addEventListener("keydown", keyDownHandler, false);
 runSse();
 
 function draw() {
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	ctx.clearRect(0, 0, game.canvasWidth, game.canvasHeight);
 	drawBall();
-	drawPaddle(paddleTopX, 0);
-	drawPaddle(paddleBottomX, canvas.height - paddleHeight)
+	drawPaddle(game.paddleTopX, 0);
+	drawPaddle(game.paddleBottomX, game.canvasHeight - game.paddleHeight)
 
-	if ((ballX > canvas.width - ballRadius) || ballX < ballRadius) {
+	if ((game.ballX > game.canvasWidth - ballRadius) || game.ballX < ballRadius) {
 		dx = -dx;
 	}
 
@@ -35,25 +43,25 @@ function draw() {
 		dy = -dy;
 	}
 
-	if ((ballY + ballRadius > canvas.height - paddleHeight) || (ballY - ballRadius) < paddleHeight) {
+	if ((game.ballY + ballRadius > game.canvasHeight - game.paddleHeight) || (game.ballY - ballRadius) < game.paddleHeight) {
 		//alert("Game Over");
 		//document.location.reload();
 	}
 
-	ballX += dx;
-	ballY += dy;
+	game.ballX += dx;
+	game.ballY += dy;
 }
 
 function shouldRevertBallByY() {
-	const isBallTouchedTopPaddle = ballX >= paddleTopX && ballX < paddleTopX + paddleWidth && ballY - ballRadius <= paddleHeight;
-	const isBallTouchedBottomPaddle = ballX >= paddleBottomX && ballX < paddleBottomX + paddleWidth && ballY + ballRadius >= canvas.height - paddleHeight;
+	const isBallTouchedTopPaddle = game.ballX >= game.paddleTopX && game.ballX < game.paddleTopX + game.paddleWidth && game.ballY - ballRadius <= game.paddleHeight;
+	const isBallTouchedBottomPaddle = game.ballX >= game.paddleBottomX && game.ballX < game.paddleBottomX + game.paddleWidth && game.ballY + ballRadius >= game.canvasHeight - game.paddleHeight;
 
 	return isBallTouchedTopPaddle || isBallTouchedBottomPaddle;
 }
 
 function drawBall() {
 	ctx.beginPath();
-	ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+	ctx.arc(game.ballX, game.ballY, ballRadius, 0, Math.PI * 2);
 	ctx.fillStyle = ballColor;
 	ctx.fill();
 	ctx.closePath();
@@ -61,7 +69,7 @@ function drawBall() {
 
 function drawPaddle(paddleX = 0, paddleY = 0) {
 	ctx.beginPath();
-	ctx.rect(paddleX, paddleY, paddleWidth, paddleHeight);
+	ctx.rect(paddleX, paddleY, game.paddleWidth, game.paddleHeight);
 	ctx.fillStyle = paddleColor;
 	ctx.fill();
 	ctx.closePath();
@@ -104,7 +112,7 @@ function runSse() {
 
 	sse.addEventListener("message", e => {
 		const data = JSON.parse(e.data);
-		console.log(data);
+		game = { ...game, ...data };
 		draw();
 	});
 }
