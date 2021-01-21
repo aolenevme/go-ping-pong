@@ -17,7 +17,7 @@ function draw() {
 	ctx.clearRect(0, 0, game.canvasWidth, game.canvasHeight);
 	drawBall();
 	drawPaddle(game.paddleTopX, 0);
-	drawPaddle(game.paddleBottomX, game.canvasHeight - game.paddleHeight)
+	drawPaddle(game.paddleBottomX, game.canvasHeight - 2 * game.paddleHeight)
 }
 
 function drawBall() {
