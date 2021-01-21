@@ -13,4 +13,5 @@ canvas {
 	display: block;
 	margin: auto;
 	width: 320px;
+	border: 1px solid #141414;
 }
