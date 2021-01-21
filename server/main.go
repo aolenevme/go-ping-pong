@@ -37,8 +37,8 @@ const (
 
 var (
 	activeClients = 0
-	ballDX        = 2
-	ballDY        = -2
+	ballDX        = 1
+	ballDY        = -1
 	game          Game
 )
 
@@ -107,10 +107,9 @@ func sseGetInformation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.Direction == "RIGHT" && (game.PaddleTopX < game.CanvasWidth-game.PaddleWidth) {
-		game.PaddleTopX += 8
-		fmt.Println(game.PaddleTopX)
+		game.PaddleTopX += 16
 	} else if req.Direction == "LEFT" && game.PaddleTopX > 0 {
-		game.PaddleTopX -= 8
+		game.PaddleTopX -= 16
 	}
 
 	w.WriteHeader(http.StatusOK)
