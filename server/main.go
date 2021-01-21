@@ -17,6 +17,7 @@ type request struct {
 type Game struct {
 	BallX         int        `json:"ballX"`
 	BallY         int        `json:"ballY"`
+	BallRadius    int        `json:"ballRadius"`
 	CanvasWidth   int        `json:"canvasWidth"`
 	CanvasHeight  int        `json:"canvasHeight"`
 	PaddleTopX    int        `json:"paddleTopX"`
@@ -101,6 +102,7 @@ func main() {
 	game = Game{
 		BallX:         canvasWidth / 2,
 		BallY:         canvasHeight - 30,
+		BallRadius:    10,
 		CanvasWidth:   canvasWidth,
 		CanvasHeight:  canvasHeight,
 		PaddleTopX:    (canvasWidth - paddleWidth) / 2,

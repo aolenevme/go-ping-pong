@@ -1,6 +1,5 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-const ballRadius = 10;
 const paddleColor = "#141414";
 const ballColor = "#d0d0cf";
 
@@ -11,20 +10,7 @@ const DIRECTIONS = Object.freeze({
 
 let dx = 2; // Убрать на сервер
 let dy = -2; // Убрать на сервер
-
-let game = {
-	ballX: 160,
-	ballY: 130,
-	canvasHeight: 160,
-	canvasWidth: 320,
-	paddleBottomX: 122,
-	paddleBottomY: 150,
-	paddleHeight: 10,
-	paddleTopX: 122,
-	paddleTopY: 0,
-	paddleWidth: 75,
-	status: "WAITING_COMPETITOR"
-};
+let game = {};
 
 document.addEventListener("keydown", keyDownHandler, false);
 runSse();
@@ -35,7 +21,7 @@ function draw() {
 	drawPaddle(game.paddleTopX, 0);
 	drawPaddle(game.paddleBottomX, game.canvasHeight - game.paddleHeight)
 
-	if ((game.ballX > game.canvasWidth - ballRadius) || game.ballX < ballRadius) {
+	if ((game.ballX > game.canvasWidth - game.ballRadius) || game.ballX < game.ballRadius) {
 		dx = -dx;
 	}
 
@@ -43,7 +29,7 @@ function draw() {
 		dy = -dy;
 	}
 
-	if ((game.ballY + ballRadius > game.canvasHeight - game.paddleHeight) || (game.ballY - ballRadius) < game.paddleHeight) {
+	if ((game.ballY + game.ballRadius > game.canvasHeight - game.paddleHeight) || (game.ballY - game.ballRadius) < game.paddleHeight) {
 		//alert("Game Over");
 		//document.location.reload();
 	}
@@ -53,15 +39,15 @@ function draw() {
 }
 
 function shouldRevertBallByY() {
-	const isBallTouchedTopPaddle = game.ballX >= game.paddleTopX && game.ballX < game.paddleTopX + game.paddleWidth && game.ballY - ballRadius <= game.paddleHeight;
-	const isBallTouchedBottomPaddle = game.ballX >= game.paddleBottomX && game.ballX < game.paddleBottomX + game.paddleWidth && game.ballY + ballRadius >= game.canvasHeight - game.paddleHeight;
+	const isBallTouchedTopPaddle = game.ballX >= game.paddleTopX && game.ballX < game.paddleTopX + game.paddleWidth && game.ballY - game.ballRadius <= game.paddleHeight;
+	const isBallTouchedBottomPaddle = game.ballX >= game.paddleBottomX && game.ballX < game.paddleBottomX + game.paddleWidth && game.ballY + game.ballRadius >= game.canvasHeight - game.paddleHeight;
 
 	return isBallTouchedTopPaddle || isBallTouchedBottomPaddle;
 }
 
 function drawBall() {
 	ctx.beginPath();
-	ctx.arc(game.ballX, game.ballY, ballRadius, 0, Math.PI * 2);
+	ctx.arc(game.ballX, game.ballY, game.ballRadius, 0, Math.PI * 2);
 	ctx.fillStyle = ballColor;
 	ctx.fill();
 	ctx.closePath();
@@ -113,6 +99,7 @@ function runSse() {
 	sse.addEventListener("message", e => {
 		const data = JSON.parse(e.data);
 		game = { ...game, ...data };
+		console.dir(game);
 		draw();
 	});
 }
