@@ -8,6 +8,10 @@ import (
 	"time"
 )
 
+type request struct {
+	Direction string `json:"direction"`
+}
+
 type GameStatus string
 
 const (
@@ -15,54 +19,52 @@ const (
 	InGame            GameStatus = "IN_GAME"
 	YouWon            GameStatus = "YOU_WON"
 	YouLost           GameStatus = "YOU_LOST"
+
+	canvasWidth = 320
+	canvasHeight = 160
+	paddleWidth = 75
+	paddleHeight = 10
+	paddleTopY = 0
+	paddleBottomY = canvasHeight-paddleHeight
 )
 
-type Game struct {
-	FirstCompetitor  UiElement
-	SecondCompetitor UiElement
-	Ball             UiElement
-	Status           GameStatus
-}
-
-type UiElement struct {
-	X int
-	Y int
-}
-
-type request struct {
-	Direction string `json:"direction"`
-}
-
-var game = Game{UiElement{-1, -1}, UiElement{-1, -1}, UiElement{0, 0}, WaitingCompetitor}
+var (
+	activeClients = 0
+	ballX = canvasWidth/2
+	ballY = canvasHeight - 30
+	ballDX = 2
+	ballDY = -2
+	gameStatus = WaitingCompetitor
+	paddleTopX = (canvasWidth - paddleWidth)/2
+	paddleBottomX = (canvasWidth - paddleWidth)/2
+)
 
 func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Connection", "keep-alive")
 	w.Header().Set("Content-Type", "text/event-stream")
 
-	if (game.FirstCompetitor == UiElement{-1, -1}) {
-		game.FirstCompetitor = UiElement{0, 0}
-	} else if (game.SecondCompetitor == UiElement{-1, -1}) {
-		game.SecondCompetitor = UiElement{0, 0}
-		game.Status = InGame
+	activeClients++
+
+	if activeClients == 2 {
+		gameStatus = InGame
+	} else if activeClients < 2 {
+		gameStatus = WaitingCompetitor
 	}
 
 	go func() {
 		<-r.Context().Done()
-		game.SecondCompetitor = UiElement{-1, -1}
-		game.Status = WaitingCompetitor
+		activeClients--
 	}()
 
 	for {
-		b, _ := json.Marshal(game)
-		fmt.Fprintf(w, "data: %s\n\n", b)
+		// b, _ := json.Marshal(game)
+		fmt.Fprintf(w, "data: %d\n\n", paddleTopX)
 		w.(http.Flusher).Flush()
 		time.Sleep(10 * time.Millisecond)
 	}
 }
 
 func sseGetInformation(w http.ResponseWriter, r *http.Request) {
-	var req request
-
 	b, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
@@ -70,16 +72,18 @@ func sseGetInformation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var req request
+
 	err = json.Unmarshal(b, &req)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
 
-	if req.Direction == "RIGHT" {
-		game.FirstCompetitor.X += 7
-	} else if req.Direction == "LEFT" {
-		game.FirstCompetitor.X -= 7
+	if req.Direction == "RIGHT" && (paddleBottomX < canvasWidth - paddleWidth) {
+		paddleTopX += 7
+	} else if req.Direction == "LEFT" && paddleTopX > 0 {
+		paddleTopX -= 7
 	}
 
 	w.WriteHeader(http.StatusOK)

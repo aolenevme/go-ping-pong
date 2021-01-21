@@ -40,6 +40,14 @@ function draw() {
 		//document.location.reload();
 	}
 
+	/**
+	if (rightPressed && (paddleBottomX < canvas.width - paddleWidth)) {
+		paddleBottomX += 7;
+	} else if (leftPressed && paddleBottomX > 0) {
+		paddleBottomX -= 7;
+	}
+	**/
+
 	ballX += dx;
 	ballY += dy;
 }
