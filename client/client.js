@@ -103,12 +103,8 @@ function runSse() {
 	});
 
 	sse.addEventListener("message", e => {
-		//const data = JSON.parse(e.data);
-		//paddleTopX = data.FirstCompetitor.X;
-		//paddleBottomX = data.SecondCompetitor.X;
-		console.log(paddleTopX);
-		paddleTopX = e.data;
-
+		const data = JSON.parse(e.data);
+		console.log(data);
 		draw();
 	});
 }
