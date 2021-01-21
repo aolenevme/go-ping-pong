@@ -106,10 +106,11 @@ func sseGetInformation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Direction == "RIGHT" && (game.PaddleBottomX < game.CanvasWidth-game.PaddleWidth) {
-		game.PaddleTopX += 7
+	if req.Direction == "RIGHT" && (game.PaddleTopX < game.CanvasWidth-game.PaddleWidth) {
+		game.PaddleTopX += 8
+		fmt.Println(game.PaddleTopX)
 	} else if req.Direction == "LEFT" && game.PaddleTopX > 0 {
-		game.PaddleTopX -= 7
+		game.PaddleTopX -= 8
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -118,7 +119,7 @@ func sseGetInformation(w http.ResponseWriter, r *http.Request) {
 func main() {
 	canvasWidth := 320
 	canvasHeight := 160
-	paddleWidth := 75
+	paddleWidth := 80
 	paddleHeight := 10
 
 	game = Game{

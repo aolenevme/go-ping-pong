@@ -17,7 +17,7 @@ function draw() {
 	ctx.clearRect(0, 0, game.canvasWidth, game.canvasHeight);
 	drawBall();
 	drawPaddle(game.paddleTopX, 0);
-	drawPaddle(game.paddleBottomX, game.canvasHeight - 2 * game.paddleHeight)
+	drawPaddle(game.paddleBottomX, game.canvasHeight - game.paddleHeight)
 }
 
 function drawBall() {
@@ -74,7 +74,6 @@ function runSse() {
 	sse.addEventListener("message", e => {
 		const data = JSON.parse(e.data);
 		game = { ...game, ...data };
-		console.dir(game);
 		draw();
 	});
 }
