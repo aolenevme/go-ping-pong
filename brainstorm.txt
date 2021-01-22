@@ -1,12 +1,9 @@
 Brainstorm
 
 1. Состояния:
-	1.1. NO_INTERNET // readyState.CLOSED
-	1.2. NO_SSE_CONNECTION // readyState.CONNECTING
-	1.3. IN_GAME
-	1.4. YOU_LOST
-	1.5. YOU_WON
-	1.6. WAITING_COMPETITOR
+	1.1. IN_GAME
+	1.2. WAITING_COMPETITOR
+	1.3. GAME_OVER
 
 2. Данные в SSE:
 	2.1. Передача положения x,y твоего весла на сервер. *POST /api/v1/sse/data*
@@ -22,3 +19,11 @@ TODO:
 	2. Проработать состояния закрытия/открытия на бэке X
 	3. Отрисовать UI для всех состояний
 	4. Соединить два клиента через SSE и отправить какие-нибудь данные. Сделать профилирование на бэке(инструменты Golang) и фронте (Performance)
+
+4. Set-Cookie brainstorming
+	4.1. Обменяться Set-Cookie во время получения index.html. Set-Cookie: id=top/bottom; HttpOnly
+	4.2. Проверять, что оба айдишника активны, на сервере
+	4.3. Передавать {destination: "RIGHT"/"LEFT"} в PUT c куками и их парсить на бэке, вытаскивая id. Обновить логику X/Y paddleBottom/paddleTop
+	4.4. Реализовать логику обнуления состояния сервера при отключении одного из игроков
+	4.5. Отрисовать UI для всех состояний: смотри пункт (1)
+	4.6. Задеплоить куда-то с https сертификатом
