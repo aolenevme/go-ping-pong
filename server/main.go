@@ -54,8 +54,6 @@ func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 
 	if len(players) == 2 {
 		game.Status = InGame
-	} else {
-		game.Status = WaitingCompetitor
 	}
 
 	go func() {
