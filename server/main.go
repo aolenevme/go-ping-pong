@@ -74,27 +74,7 @@ func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	for {
-		if game.BallY > game.CanvasWidth-game.BallRadius || game.BallX < game.BallRadius {
-			ballDX = -ballDX
-		}
-
-		if shouldReverBallByY() {
-			ballDY = -ballDY
-		}
-
-		if game.BallY+game.BallRadius > game.CanvasHeight-game.PaddleHeight || game.BallY-game.BallRadius < game.PaddleHeight {
-			//game.Status = GameOver
-		}
-
-		game.BallX += ballDX
-		game.BallY += ballDY
-
-		jsonPayload, _ := json.Marshal(game)
-		fmt.Fprintf(w, "data: %s\n\n", jsonPayload)
-		w.(http.Flusher).Flush()
-		time.Sleep(10 * time.Millisecond)
-	}
+	flushNewData(w)
 }
 
 func getClientIdCookie(r *http.Request) string {
@@ -112,6 +92,32 @@ func getClientIdCookie(r *http.Request) string {
 	}
 
 	return clientIdCookie
+}
+
+func flushNewData(w http.ResponseWriter) {
+	for {
+		if game.Status == InGame {
+
+			if game.BallY > game.CanvasWidth-game.BallRadius || game.BallX < game.BallRadius {
+				ballDX = -ballDX
+			}
+
+			if shouldReverBallByY() {
+				ballDY = -ballDY
+			}
+
+			if game.BallY+game.BallRadius > game.CanvasHeight-game.PaddleHeight || game.BallY-game.BallRadius < game.PaddleHeight {
+				//game.Status = GameOver
+			}
+
+			game.BallX += ballDX
+			game.BallY += ballDY
+		}
+		jsonPayload, _ := json.Marshal(game)
+		fmt.Fprintf(w, "data: %s\n\n", jsonPayload)
+		w.(http.Flusher).Flush()
+		time.Sleep(10 * time.Millisecond)
+	}
 }
 
 func shouldReverBallByY() bool {
@@ -138,10 +144,13 @@ func sseGetInformation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Direction == "RIGHT" && (game.PaddleTopX < game.CanvasWidth-game.PaddleWidth) {
-		game.PaddleTopX += 16
-	} else if req.Direction == "LEFT" && game.PaddleTopX > 0 {
-		game.PaddleTopX -= 16
+	if game.Status == InGame {
+
+		if req.Direction == "RIGHT" && (game.PaddleTopX < game.CanvasWidth-game.PaddleWidth) {
+			game.PaddleTopX += 16
+		} else if req.Direction == "LEFT" && game.PaddleTopX > 0 {
+			game.PaddleTopX -= 16
+		}
 	}
 
 	w.WriteHeader(http.StatusOK)
