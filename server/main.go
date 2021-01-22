@@ -37,11 +37,10 @@ const (
 )
 
 var (
-	ballDX   = 1
-	ballDY   = -1
-	game     Game
-	players2 = make(map[string]string)
-	players  []string
+	ballDX  = 1
+	ballDY  = -1
+	game    Game
+	players = make(map[string]string)
 )
 
 func sseSendInformation(w http.ResponseWriter, r *http.Request) {
@@ -49,17 +48,16 @@ func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/event-stream")
 
 	clientIdCookie := getClientIdCookie(r)
+	fmt.Println(clientIdCookie)
 	if clientIdCookie != "" {
-		if players2["PaddleTopX"] == "" {
-			players2["PaddleTopX"] = clientIdCookie
-		} else if players2["PaddleBottomX"] == "" {
-			players2["PaddleBottomX"] = clientIdCookie
+		if players["PaddleTopX"] == "" {
+			players["PaddleTopX"] = clientIdCookie
+		} else if players["PaddleBottomX"] == "" {
+			players["PaddleBottomX"] = clientIdCookie
 		}
 	}
 
-	fmt.Printf("%+v", players2)
-
-	if players2["PaddleTopX"] != "" && players2["PaddleBottomX"] != "" {
+	if players["PaddleTopX"] != "" && players["PaddleBottomX"] != "" {
 		game.Status = InGame
 	}
 
@@ -68,8 +66,10 @@ func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 
 		game = initGame()
 
-		delete(players2, "PaddleTopX")
-		delete(players2, "PaddleBottomX")
+		delete(players, "PaddleTopX")
+		delete(players, "PaddleBottomX")
+
+		fmt.Printf("%+v", players)
 	}()
 
 	flushNewData(w)
@@ -96,7 +96,7 @@ func flushNewData(w http.ResponseWriter) {
 	for {
 		if game.Status == InGame {
 
-			if game.BallY > game.CanvasWidth-game.BallRadius || game.BallX < game.BallRadius {
+			if game.BallX >= game.CanvasWidth-game.BallRadius || game.BallX <= game.BallRadius {
 				ballDX = -ballDX
 			}
 
@@ -105,7 +105,7 @@ func flushNewData(w http.ResponseWriter) {
 			}
 
 			if game.BallY+game.BallRadius > game.CanvasHeight-game.PaddleHeight || game.BallY-game.BallRadius < game.PaddleHeight {
-				//game.Status = GameOver
+				game.Status = GameOver
 			}
 
 			game.BallX += ballDX
@@ -114,7 +114,7 @@ func flushNewData(w http.ResponseWriter) {
 		jsonPayload, _ := json.Marshal(game)
 		fmt.Fprintf(w, "data: %s\n\n", jsonPayload)
 		w.(http.Flusher).Flush()
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 	}
 }
 
@@ -147,7 +147,7 @@ func sseGetInformation(w http.ResponseWriter, r *http.Request) {
 
 		paddlePositionX := &game.PaddleTopX
 
-		if players2["PaddleBottomX"] == clientIdCookie {
+		if players["PaddleBottomX"] == clientIdCookie {
 			paddlePositionX = &game.PaddleBottomX
 		}
 
