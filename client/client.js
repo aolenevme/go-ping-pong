@@ -74,6 +74,7 @@ function runSse() {
 	sse.addEventListener("message", e => {
 		const data = JSON.parse(e.data);
 		game = { ...game, ...data };
+		console.log(game.status);
 		draw();
 	});
 }

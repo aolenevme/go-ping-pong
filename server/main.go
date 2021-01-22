@@ -61,6 +61,14 @@ func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		<-r.Context().Done()
 
+		game.Status = WaitingCompetitor
+
+		if len(players) == 1 {
+			players = []string{}
+
+			return
+		}
+
 		for idx, playerId := range players {
 			if playerId == clientIdCookie {
 				players = append(players[:idx], players[idx+1:]...)
