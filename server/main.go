@@ -61,7 +61,7 @@ func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		<-r.Context().Done()
 
-		game.Status = WaitingCompetitor
+		game = initGame()
 
 		if len(players) == 1 {
 			players = []string{}
@@ -149,13 +149,13 @@ func sseGetInformation(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func main() {
+func initGame() Game {
 	canvasWidth := 320
 	canvasHeight := 160
 	paddleWidth := 80
 	paddleHeight := 10
 
-	game = Game{
+	return Game{
 		BallX:         canvasWidth / 2,
 		BallY:         canvasHeight - 30,
 		BallRadius:    10,
@@ -169,6 +169,10 @@ func main() {
 		PaddleHeight:  10,
 		Status:        WaitingCompetitor,
 	}
+}
+
+func main() {
+	game = initGame()
 
 	sse := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
