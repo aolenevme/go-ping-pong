@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -44,6 +45,17 @@ var (
 func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Connection", "keep-alive")
 	w.Header().Set("Content-Type", "text/event-stream")
+
+	cookies := strings.Split(r.Header["Cookie"][0], ";")
+
+	clientIdCookie := ""
+	for _, cookie := range cookies {
+		if strings.HasPrefix(cookie, "client-id") {
+			clientIdCookie = strings.Split(cookie, "=")[1]
+		}
+	}
+
+	fmt.Printf("%+v\n", clientIdCookie)
 
 	go func() {
 		<-r.Context().Done()
