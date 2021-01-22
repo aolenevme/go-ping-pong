@@ -37,29 +37,35 @@ const (
 )
 
 var (
-	ballDX = 1
-	ballDY = -1
-	game   Game
+	ballDX  = 1
+	ballDY  = -1
+	game    Game
+	players []string
 )
 
 func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Connection", "keep-alive")
 	w.Header().Set("Content-Type", "text/event-stream")
 
-	cookies := strings.Split(r.Header["Cookie"][0], ";")
-
-	clientIdCookie := ""
-	for _, cookie := range cookies {
-		if strings.HasPrefix(cookie, "client-id") {
-			clientIdCookie = strings.Split(cookie, "=")[1]
-		}
+	clientIdCookie := getClientIdCookie(r)
+	if clientIdCookie != "" {
+		players = append(players, clientIdCookie)
 	}
 
-	fmt.Printf("%+v\n", clientIdCookie)
+	if len(players) == 2 {
+		game.Status = InGame
+	} else {
+		game.Status = WaitingCompetitor
+	}
 
 	go func() {
 		<-r.Context().Done()
-		// чекнуть куки и обнулить нужного юзера
+
+		for idx, playerId := range players {
+			if playerId == clientIdCookie {
+				players = append(players[:idx], players[idx+1:]...)
+			}
+		}
 	}()
 
 	for {
@@ -72,7 +78,7 @@ func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if game.BallY+game.BallRadius > game.CanvasHeight-game.PaddleHeight || game.BallY-game.BallRadius < game.PaddleHeight {
-			game.Status = GameOver
+			//game.Status = GameOver
 		}
 
 		game.BallX += ballDX
@@ -83,6 +89,23 @@ func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 		w.(http.Flusher).Flush()
 		time.Sleep(10 * time.Millisecond)
 	}
+}
+
+func getClientIdCookie(r *http.Request) string {
+	cookies := strings.Split(r.Header["Cookie"][0], ";")
+	clientIdCookie := ""
+
+	for _, cookie := range cookies {
+		cookie = strings.Trim(cookie, " ")
+
+		if strings.HasPrefix(cookie, "client-id") {
+			clientIdCookie = strings.Split(cookie, "=")[1]
+
+			break
+		}
+	}
+
+	return clientIdCookie
 }
 
 func shouldReverBallByY() bool {
