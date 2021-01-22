@@ -37,10 +37,11 @@ const (
 )
 
 var (
-	ballDX  = 1
-	ballDY  = -1
-	game    Game
-	players []string
+	ballDX   = 1
+	ballDY   = -1
+	game     Game
+	players2 = make(map[string]string)
+	players  []string
 )
 
 func sseSendInformation(w http.ResponseWriter, r *http.Request) {
@@ -49,10 +50,16 @@ func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 
 	clientIdCookie := getClientIdCookie(r)
 	if clientIdCookie != "" {
-		players = append(players, clientIdCookie)
+		if players2["PaddleTopX"] == "" {
+			players2["PaddleTopX"] = clientIdCookie
+		} else if players2["PaddleBottomX"] == "" {
+			players2["PaddleBottomX"] = clientIdCookie
+		}
 	}
 
-	if len(players) == 2 {
+	fmt.Printf("%+v", players2)
+
+	if players2["PaddleTopX"] != "" && players2["PaddleBottomX"] != "" {
 		game.Status = InGame
 	}
 
@@ -61,17 +68,8 @@ func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 
 		game = initGame()
 
-		if len(players) == 1 {
-			players = []string{}
-
-			return
-		}
-
-		for idx, playerId := range players {
-			if playerId == clientIdCookie {
-				players = append(players[:idx], players[idx+1:]...)
-			}
-		}
+		delete(players2, "PaddleTopX")
+		delete(players2, "PaddleBottomX")
 	}()
 
 	flushNewData(w)
@@ -145,11 +143,18 @@ func sseGetInformation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if game.Status == InGame {
+		clientIdCookie := getClientIdCookie(r)
 
-		if req.Direction == "RIGHT" && (game.PaddleTopX < game.CanvasWidth-game.PaddleWidth) {
-			game.PaddleTopX += 16
-		} else if req.Direction == "LEFT" && game.PaddleTopX > 0 {
-			game.PaddleTopX -= 16
+		paddlePositionX := &game.PaddleTopX
+
+		if players2["PaddleBottomX"] == clientIdCookie {
+			paddlePositionX = &game.PaddleBottomX
+		}
+
+		if req.Direction == "RIGHT" && (*paddlePositionX < game.CanvasWidth-game.PaddleWidth) {
+			*paddlePositionX += 16
+		} else if req.Direction == "LEFT" && *paddlePositionX > 0 {
+			*paddlePositionX -= 16
 		}
 	}
 
