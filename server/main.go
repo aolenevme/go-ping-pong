@@ -37,13 +37,16 @@ const (
 )
 
 var (
-	ballDX  = 1
-	ballDY  = -1
-	game    Game
-	players = make(map[string]string)
+	ballDX   = 1
+	ballDY   = -1
+	game     Game
+	players  = make(map[string]string)
+	closeSse = make(chan bool)
 )
 
 func sseSendInformation(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
 	w.Header().Set("Connection", "keep-alive")
 	w.Header().Set("Content-Type", "text/event-stream")
 
@@ -69,6 +72,8 @@ func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 
 		delete(players, "PaddleTopX")
 		delete(players, "PaddleBottomX")
+
+		closeSse <- true
 	}()
 
 	flushNewData(w)
@@ -93,27 +98,32 @@ func getClientIdCookie(r *http.Request) string {
 
 func flushNewData(w http.ResponseWriter) {
 	for {
-		if game.Status == InGame {
+		select {
+		case <-closeSse:
+			return
+		default:
+			if game.Status == InGame {
 
-			if game.BallX >= game.CanvasWidth-game.BallRadius || game.BallX <= game.BallRadius {
-				ballDX = -ballDX
+				if game.BallX >= game.CanvasWidth-game.BallRadius || game.BallX <= game.BallRadius {
+					ballDX = -ballDX
+				}
+
+				if shouldReverBallByY() {
+					ballDY = -ballDY
+				}
+
+				if game.BallY+game.BallRadius > game.CanvasHeight-game.PaddleHeight || game.BallY-game.BallRadius < game.PaddleHeight {
+					game.Status = GameOver
+				}
+
+				game.BallX += ballDX
+				game.BallY += ballDY
 			}
-
-			if shouldReverBallByY() {
-				ballDY = -ballDY
-			}
-
-			if game.BallY+game.BallRadius > game.CanvasHeight-game.PaddleHeight || game.BallY-game.BallRadius < game.PaddleHeight {
-				game.Status = GameOver
-			}
-
-			game.BallX += ballDX
-			game.BallY += ballDY
+			jsonPayload, _ := json.Marshal(game)
+			fmt.Fprintf(w, "data: %s\n\n", jsonPayload)
+			w.(http.Flusher).Flush()
+			time.Sleep(100 * time.Millisecond)
 		}
-		jsonPayload, _ := json.Marshal(game)
-		fmt.Fprintf(w, "data: %s\n\n", jsonPayload)
-		w.(http.Flusher).Flush()
-		time.Sleep(100 * time.Millisecond)
 	}
 }
 
