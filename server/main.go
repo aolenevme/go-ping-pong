@@ -48,11 +48,12 @@ func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/event-stream")
 
 	clientIdCookie := getClientIdCookie(r)
-	fmt.Println(clientIdCookie)
 	if clientIdCookie != "" {
-		if players["PaddleTopX"] == "" {
+		if _, ok := players["PaddleTopX"]; !ok {
 			players["PaddleTopX"] = clientIdCookie
-		} else if players["PaddleBottomX"] == "" {
+		}
+
+		if _, ok := players["PaddleBottomX"]; !ok {
 			players["PaddleBottomX"] = clientIdCookie
 		}
 	}
@@ -68,8 +69,6 @@ func sseSendInformation(w http.ResponseWriter, r *http.Request) {
 
 		delete(players, "PaddleTopX")
 		delete(players, "PaddleBottomX")
-
-		fmt.Printf("%+v", players)
 	}()
 
 	flushNewData(w)

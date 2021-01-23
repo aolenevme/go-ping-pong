@@ -76,6 +76,8 @@ function runSse() {
 		game = { ...game, ...data };
 		draw();
 
+		console.dir(game)
+
 		if (game.status === "GAME_OVER") {
 			sse.close();
 			document.location.reload();
